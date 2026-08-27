@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RA Perioperative GC — In-Hospital Infection Risk Estimator</title>
+<style>
+  :root { --bg:#f6f8fa; --card:#fff; --ink:#1f2933; --muted:#66727f; --acc:#2563eb; --acc2:#1e88e5; --warn:#b45309; --line:#e3e8ee; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--ink); line-height:1.55; }
+  .wrap { max-width:760px; margin:0 auto; padding:28px 20px 56px; }
+  header h1 { font-size:1.5rem; margin:0 0 4px; }
+  header p.sub { color:var(--muted); margin:0 0 18px; font-size:.92rem; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px 22px; margin:16px 0; box-shadow:0 1px 2px rgba(16,24,40,.04); }
+  h2 { font-size:1.08rem; margin:0 0 14px; }
+  .field { display:flex; flex-direction:column; gap:6px; margin:12px 0; }
+  .field label { font-weight:600; font-size:.92rem; }
+  .field .hint { color:var(--muted); font-size:.8rem; font-weight:400; }
+  input[type=number], select { padding:9px 10px; font-size:1rem; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--ink); width:100%; max-width:280px; }
+  .row { display:flex; flex-wrap:wrap; gap:18px; }
+  .row > div { flex:1 1 220px; }
+  button.calc { margin-top:16px; background:var(--acc); color:#fff; border:0; border-radius:8px; padding:11px 22px; font-size:1rem; cursor:pointer; }
+  button.calc:hover { background:var(--acc2); }
+  .result { margin-top:18px; padding:18px; border-radius:10px; background:#eef4ff; border:1px solid #cfe0ff; }
+  .result .big { font-size:2.1rem; font-weight:700; color:var(--acc); }
+  .result .pct { font-size:1rem; color:var(--muted); }
+  .bar { height:14px; border-radius:7px; background:#dbe6f7; overflow:hidden; margin:12px 0 4px; }
+  .bar > span { display:block; height:100%; background:linear-gradient(90deg,#1e88e5,#2563eb); width:0%; transition:width .4s ease; }
+  .note { font-size:.82rem; color:var(--muted); margin-top:10px; }
+  .disc { background:#fff7ed; border:1px solid #fed7aa; color:#7c2d12; border-radius:10px; padding:14px 16px; font-size:.85rem; margin-top:8px; }
+  code { background:#eef2f6; padding:1px 5px; border-radius:4px; font-size:.86em; }
+  footer { color:var(--muted); font-size:.8rem; margin-top:24px; text-align:center; }
+  a { color:var(--acc); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>In-Hospital Infection Risk Estimator</h1>
+    <p class="sub">Rheumatoid arthritis (RA) surgical patients in the ICU · companion tool to the multi-database cohort study</p>
+  </header>
+
+  <div class="card">
+    <h2>Inputs</h2>
+    <div class="row">
+      <div class="field">
+        <label for="gc">Glucocorticoid exposure during admission</label>
+        <select id="gc">
+          <option value="1">Yes (any systemic GC)</option>
+          <option value="0" selected>No</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="sex">Sex</label>
+        <select id="sex">
+          <option value="0">Female</option>
+          <option value="1">Male</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label for="age">Age (years)</label>
+        <input type="number" id="age" value="69" min="18" max="110" step="1" />
+      </div>
+      <div class="field">
+        <label for="sofa">SOFA score</label>
+        <input type="number" id="sofa" value="5" min="0" max="24" step="1" />
+        <span class="hint">Sequential Organ Failure Assessment at ICU admission</span>
+      </div>
+      <div class="field">
+        <label for="charlson">Charlson comorbidity index</label>
+        <input type="number" id="charlson" value="6" min="0" max="30" step="1" />
+      </div>
+    </div>
+    <button class="calc" onclick="compute()">Estimate risk</button>
+
+    <div class="result" id="result" style="display:none">
+      <div><span class="big" id="prob">–</span> <span class="pct">predicted probability of in-hospital infection</span></div>
+      <div class="bar"><span id="barfill"></span></div>
+      <div class="note" id="detail"></div>
+    </div>
+  </div>
+
+  <div class="disc">
+    <strong>Research use only — not for clinical decision-making.</strong>
+    This tool is a transparent implementation of a multivariable logistic-regression model fitted on the
+    MIMIC-IV ICU RA subgroup (n = 668) used in the companion cohort study. Predictors: any systemic
+    glucocorticoid exposure during admission, age, sex, SOFA, and Charlson comorbidity index.
+    The estimated association is <em>observational</em>; glucocorticoids are frequently administered to
+    sicker patients (indication/confounding by severity), so the output reflects a risk profile, not a
+    causal effect of the drug. External validation is pending.
+  </div>
+
+  <div class="card">
+    <h2>Model</h2>
+    <p class="note" style="margin-top:0">
+      logit(p) = β₀ + β<sub>GC</sub>·GC + β<sub>age</sub>·age + β<sub>sex</sub>·sex + β<sub>SOFA</sub>·SOFA + β<sub>Charlson</sub>·Charlson<br/>
+      β₀ = −1.7189 · β<sub>GC</sub> = 0.6382 · β<sub>age</sub> = 0.0042 · β<sub>sex(M)</sub> = −0.4373 · β<sub>SOFA</sub> = 0.1697 · β<sub>Charlson</sub> = 0.0956
+    </p>
+  </div>
+
+  <footer>
+    Code &amp; data extraction: <a href="https://github.com/morrosun/ra-periop-gc-analysis">github.com/morrosun/ra-periop-gc-analysis</a> ·
+    See repository README for the full analysis pipeline and PhysioNet data-use notice.
+  </footer>
+</div>
+
+<script>
+  var B = { intercept:-1.71892, gc:0.63819, age:0.0042, sex:-0.43734, sofa:0.1697, charlson:0.09556 };
+  function compute() {
+    var gc = parseFloat(document.getElementById('gc').value);
+    var sex = parseFloat(document.getElementById('sex').value);
+    var age = parseFloat(document.getElementById('age').value);
+    var sofa = parseFloat(document.getElementById('sofa').value);
+    var charlson = parseFloat(document.getElementById('charlson').value);
+    if ([age,sofa,charlson].some(function(v){ return isNaN(v); })) {
+      alert('Please enter valid numeric values for age, SOFA and Charlson.');
+      return;
+    }
+    var logit = B.intercept + B.gc*gc + B.age*age + B.sex*sex + B.sofa*sofa + B.charlson*charlson;
+    var p = 1/(1+Math.exp(-logit));
+    var pct = (p*100);
+    document.getElementById('prob').textContent = pct.toFixed(1) + '%';
+    document.getElementById('barfill').style.width = Math.min(100,pct).toFixed(1) + '%';
+    document.getElementById('detail').innerHTML =
+      'GC exposure: ' + (gc? 'yes':'no') + ' · Age: ' + age + ' · Sex: ' + (sex? 'male':'female') +
+      ' · SOFA: ' + sofa + ' · Charlson: ' + charlson +
+      '<br/>logit = ' + logit.toFixed(3);
+    document.getElementById('result').style.display = 'block';
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RA 围术期 GC — 院内感染风险估算器</title>
+<style>
+  :root { --bg:#f6f8fa; --card:#fff; --ink:#1f2933; --muted:#66727f; --acc:#2563eb; --acc2:#1e88e5; --line:#e3e8ee; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--ink); line-height:1.6; }
+  .wrap { max-width:760px; margin:0 auto; padding:28px 20px 56px; }
+  header h1 { font-size:1.5rem; margin:0 0 4px; }
+  header p.sub { color:var(--muted); margin:0 0 18px; font-size:.92rem; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px 22px; margin:16px 0; box-shadow:0 1px 2px rgba(16,24,40,.04); }
+  h2 { font-size:1.08rem; margin:0 0 14px; }
+  .field { display:flex; flex-direction:column; gap:6px; margin:12px 0; }
+  .field label { font-weight:600; font-size:.92rem; }
+  .field .hint { color:var(--muted); font-size:.8rem; font-weight:400; }
+  input[type=number], select { padding:9px 10px; font-size:1rem; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--ink); width:100%; max-width:280px; }
+  .row { display:flex; flex-wrap:wrap; gap:18px; }
+  .row > div { flex:1 1 220px; }
+  button.calc { margin-top:16px; background:var(--acc); color:#fff; border:0; border-radius:8px; padding:11px 22px; font-size:1rem; cursor:pointer; }
+  button.calc:hover { background:var(--acc2); }
+  .result { margin-top:18px; padding:18px; border-radius:10px; background:#eef4ff; border:1px solid #cfe0ff; }
+  .result .big { font-size:2.1rem; font-weight:700; color:var(--acc); }
+  .result .pct { font-size:1rem; color:var(--muted); }
+  .bar { height:14px; border-radius:7px; background:#dbe6f7; overflow:hidden; margin:12px 0 4px; }
+  .bar > span { display:block; height:100%; background:linear-gradient(90deg,#1e88e5,#2563eb); width:0%; transition:width .4s ease; }
+  .note { font-size:.82rem; color:var(--muted); margin-top:10px; }
+  .disc { background:#fff7ed; border:1px solid #fed7aa; color:#7c2d12; border-radius:10px; padding:14px 16px; font-size:.85rem; margin-top:8px; }
+  code { background:#eef2f6; padding:1px 5px; border-radius:4px; font-size:.86em; }
+  footer { color:var(--muted); font-size:.8rem; margin-top:24px; text-align:center; }
+  a { color:var(--acc); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>院内感染风险估算器</h1>
+    <p class="sub">类风湿关节炎（RA）ICU 外科患者 · 多数据库队列研究配套工具</p>
+  </header>
+
+  <div class="card">
+    <h2>输入参数</h2>
+    <div class="row">
+      <div class="field">
+        <label for="gc">住院期间糖皮质激素暴露</label>
+        <select id="gc">
+          <option value="1">有（任何全身性 GC）</option>
+          <option value="0" selected>无</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="sex">性别</label>
+        <select id="sex">
+          <option value="0">女</option>
+          <option value="1">男</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label for="age">年龄（岁）</label>
+        <input type="number" id="age" value="69" min="18" max="110" step="1" />
+      </div>
+      <div class="field">
+        <label for="sofa">SOFA 评分</label>
+        <input type="number" id="sofa" value="5" min="0" max="24" step="1" />
+        <span class="hint">ICU 入室时序贯器官衰竭评分</span>
+      </div>
+      <div class="field">
+        <label for="charlson">Charlson 合并症指数</label>
+        <input type="number" id="charlson" value="6" min="0" max="30" step="1" />
+      </div>
+    </div>
+    <button class="calc" onclick="compute()">估算风险</button>
+
+    <div class="result" id="result" style="display:none">
+      <div><span class="big" id="prob">–</span> <span class="pct">院内感染预测概率</span></div>
+      <div class="bar"><span id="barfill"></span></div>
+      <div class="note" id="detail"></div>
+    </div>
+  </div>
+
+  <div class="disc">
+    <strong>仅供研究使用 — 不可替代临床决策。</strong>
+    本工具是配套队列研究中多变量 logistic 回归模型的透明实现，模型基于 MIMIC-IV ICU 的 RA 亚组
+    （n = 668）拟合。预测变量：住院期间任何全身性糖皮质激素暴露、年龄、性别、SOFA、Charlson 合并症指数。
+    所得关联为<em>观察性</em>结果；糖皮质激素常更常用于病情更重的患者（指征偏倚/严重度混杂），
+    因此输出反映的是风险画像，而非药物的因果效应。外部验证尚待完成。
+  </div>
+
+  <div class="card">
+    <h2>模型</h2>
+    <p class="note" style="margin-top:0">
+      logit(p) = β₀ + β<sub>GC</sub>·GC + β<sub>年龄</sub>·年龄 + β<sub>性别</sub>·性别 + β<sub>SOFA</sub>·SOFA + β<sub>Charlson</sub>·Charlson<br/>
+      β₀ = −1.7189 · β<sub>GC</sub> = 0.6382 · β<sub>年龄</sub> = 0.0042 · β<sub>性别(男)</sub> = −0.4373 · β<sub>SOFA</sub> = 0.1697 · β<sub>Charlson</sub> = 0.0956
+    </p>
+  </div>
+
+  <footer>
+    代码与数据提取：<a href="https://github.com/morrosun/ra-periop-gc-analysis">github.com/morrosun/ra-periop-gc-analysis</a> ·
+    完整分析流程与 PhysioNet 数据使用声明见仓库 README。
+  </footer>
+</div>
+
+<script>
+  var B = { intercept:-1.71892, gc:0.63819, age:0.0042, sex:-0.43734, sofa:0.1697, charlson:0.09556 };
+  function compute() {
+    var gc = parseFloat(document.getElementById('gc').value);
+    var sex = parseFloat(document.getElementById('sex').value);
+    var age = parseFloat(document.getElementById('age').value);
+    var sofa = parseFloat(document.getElementById('sofa').value);
+    var charlson = parseFloat(document.getElementById('charlson').value);
+    if ([age,sofa,charlson].some(function(v){ return isNaN(v); })) {
+      alert('请输入有效的年龄、SOFA 与 Charlson 数值。');
+      return;
+    }
+    var logit = B.intercept + B.gc*gc + B.age*age + B.sex*sex + B.sofa*sofa + B.charlson*charlson;
+    var p = 1/(1+Math.exp(-logit));
+    var pct = (p*100);
+    document.getElementById('prob').textContent = pct.toFixed(1) + '%';
+    document.getElementById('barfill').style.width = Math.min(100,pct).toFixed(1) + '%';
+    document.getElementById('detail').innerHTML =
+      'GC 暴露：' + (gc? '有':'无') + ' · 年龄：' + age + ' · 性别：' + (sex? '男':'女') +
+      ' · SOFA：' + sofa + ' · Charlson：' + charlson +
+      '<br/>logit = ' + logit.toFixed(3);
+    document.getElementById('result').style.display = 'block';
+  }
+</script>
+</body>
+</html>
