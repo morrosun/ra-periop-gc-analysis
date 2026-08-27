@@ -99,8 +99,12 @@ covered by this license. Database contents remain under their respective PhysioN
 
 ## Citation & DOI
 
-A version-specific DOI will be issued via Zenodo on the first GitHub Release (pending). Once published,
-cite:
+A version-specific DOI is issued via Zenodo on each GitHub Release.
+
+- **Release v1.0.0**: <https://github.com/morrosun/ra-periop-gc-analysis/releases/tag/v1.0.0>
+- **Zenodo DOI**: *pending* — assigned automatically when Zenodo harvests the GitHub Release (see below).
+
+Cite:
 
 > Wang K, et al. Glucocorticoid exposure, in-hospital infection, and short-term mortality in surgical
 > patients with rheumatoid arthritis: a multi-database intensive care cohort study. *[Journal, in press]*.
