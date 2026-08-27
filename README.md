@@ -87,7 +87,10 @@ admission, age, sex, SOFA, and Charlson comorbidity index.
 Model coefficients (hard-coded in the page): β₀ = −1.7189, β_GC = 0.6382, β_age = 0.0042,
 β_sex(M) = −0.4373, β_SOFA = 0.1697, β_Charlson = 0.0956.
 
-The calculator is also deployed via GitHub Pages (see repository About / website link).
+The calculator is deployed via GitHub Pages:
+
+- English: <https://morrosun.github.io/ra-periop-gc-analysis/>
+- 中文: <https://morrosun.github.io/ra-periop-gc-analysis/index_zh.html>
 
 ## License
 
