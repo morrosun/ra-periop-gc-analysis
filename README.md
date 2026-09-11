@@ -101,11 +101,18 @@ covered by this license. Database contents remain under their respective PhysioN
 
 A version-specific DOI is issued via Zenodo on each GitHub Release.
 
-- **Release v1.0.0**: <https://github.com/morrosun/ra-periop-gc-analysis/releases/tag/v1.0.0>
-- **Zenodo DOI**: *pending* — assigned automatically when Zenodo harvests the GitHub Release (see below).
+- **Version DOI (v1.0.1, cite this):** [`10.5281/zenodo.22715689`](https://doi.org/10.5281/zenodo.22715689)
+  — <https://zenodo.org/records/22715689>
+- **Concept DOI (all versions, always latest):** [`10.5281/zenodo.22715688`](https://doi.org/10.5281/zenodo.22715688)
+- **Release v1.0.1:** <https://github.com/morrosun/ra-periop-gc-analysis/releases/tag/v1.0.1>
+
+> Note: v1.0.0 was never archived — the Zenodo GitHub webhook was registered on this repository after that
+> release was published, so Zenodo never received the event. v1.0.1 re-triggered the harvest and is the
+> first archived version. Cite the v1.0.1 DOI above.
 
 Cite:
 
 > Wang K, et al. Glucocorticoid exposure, in-hospital infection, and short-term mortality in surgical
 > patients with rheumatoid arthritis: a multi-database intensive care cohort study. *[Journal, in press]*.
-> Code & data-extraction: https://github.com/morrosun/ra-periop-gc-analysis (DOI: *to be added*).
+> Code & data-extraction: https://github.com/morrosun/ra-periop-gc-analysis.
+> DOI: 10.5281/zenodo.22715689.
