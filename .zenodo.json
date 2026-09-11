@@ -1,0 +1,25 @@
+{
+  "title": "ra-periop-gc-analysis: RA perioperative glucocorticoid ICU cohort analysis code and web risk estimator",
+  "description": "Data-extraction SQL and analysis code accompanying the multi-database observational study of glucocorticoid exposure, in-hospital infection, and short-term mortality in surgical patients with rheumatoid arthritis (MIMIC-IV, eICU-CRD, INSPIRE, NWICU). Includes a pure front-end web risk estimator for in-hospital infection. No patient-level data are included: all source databases are governed by PhysioNet data-use agreements, so users must obtain the databases and run the SQL extraction under their own DUA.",
+  "license": "mit",
+  "upload_type": "software",
+  "access_right": "open",
+  "creators": [
+    {
+      "name": "Wang, Kai",
+      "affiliation": "The Affiliated Huaian No.1 People's Hospital of Nanjing Medical University"
+    }
+  ],
+  "keywords": [
+    "rheumatoid arthritis",
+    "glucocorticoid",
+    "perioperative",
+    "intensive care",
+    "MIMIC-IV",
+    "eICU-CRD",
+    "INSPIRE",
+    "NWICU",
+    "marginal structural model",
+    "competing risk"
+  ]
+}
