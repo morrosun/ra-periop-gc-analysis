@@ -63,9 +63,10 @@ ra-periop-gc-analysis/
 
 ## Dependencies
 
-**Python** (tested with 3.13): `pandas`, `numpy`, `statsmodels`, `lifelines`, `scipy`.
-Load your local environment via `PYTHONPATH` (e.g. `export PYTHONPATH=/path/to/.pylibs`) or `pip install -r`
-after exporting the requirements.
+**Python** (tested with 3.13): `pandas`, `numpy`, `scipy`, `statsmodels`, `lifelines`,
+`scikit-learn` (for `IterativeImputer`), and `matplotlib` (for the forest/weight plots).
+Install them with `pip install -r requirements.txt` from the repository root. Scripts also accept a
+pre-built local environment through `PYTHONPATH` or the `RA_GC_PYLIBS` variable (default `./.pylibs`).
 
 **R** (tested with 4.6): `survival` (required) and `cmprsk` (reference only; the Fine–Gray estimate uses
 the Gray-weighted Cox implementation, which does not depend on `cmprsk`).
@@ -99,20 +100,22 @@ covered by this license. Database contents remain under their respective PhysioN
 
 ## Citation & DOI
 
-A version-specific DOI is issued via Zenodo on each GitHub Release.
+A version-specific DOI is issued by Zenodo on each GitHub Release; the concept DOI below always
+resolves to the most recently archived version.
 
-- **Version DOI (v1.0.1, cite this):** [`10.5281/zenodo.22715689`](https://doi.org/10.5281/zenodo.22715689)
-  — <https://zenodo.org/records/22715689>
-- **Concept DOI (all versions, always latest):** [`10.5281/zenodo.22715688`](https://doi.org/10.5281/zenodo.22715688)
-- **Release v1.0.1:** <https://github.com/morrosun/ra-periop-gc-analysis/releases/tag/v1.0.1>
+- **Concept DOI (cite this — always resolves to the latest archived version):**
+  [`10.5281/zenodo.22715688`](https://doi.org/10.5281/zenodo.22715688)
+- **Current archived release:** v1.0.2. The version-specific DOI is listed on the
+  [releases page](https://github.com/morrosun/ra-periop-gc-analysis/releases).
 
-> Note: v1.0.0 was never archived — the Zenodo GitHub webhook was registered on this repository after that
-> release was published, so Zenodo never received the event. v1.0.1 re-triggered the harvest and is the
-> first archived version. Cite the v1.0.1 DOI above.
+> Note: v1.0.0 was never archived — the Zenodo GitHub webhook was registered on this repository after
+> that release was published, so Zenodo never received the event. v1.0.1 was the first archived version;
+> v1.0.2 is the current archived release. The concept DOI is intentionally used as the primary citation
+> so that it remains valid across versions and never points to a "pending" record.
 
 Cite:
 
 > Wang K, et al. Glucocorticoid exposure, in-hospital infection, and short-term mortality in surgical
 > patients with rheumatoid arthritis: a multi-database intensive care cohort study. *[Journal, in press]*.
 > Code & data-extraction: https://github.com/morrosun/ra-periop-gc-analysis.
-> DOI: 10.5281/zenodo.22715689.
+> DOI: 10.5281/zenodo.22715688 (concept DOI; resolves to the latest archived version).

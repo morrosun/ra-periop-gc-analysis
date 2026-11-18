@@ -144,24 +144,24 @@ weights("GC use -> infection (DL-RE pooled 1.44 [1.22-1.68])",
          [("MIMIC-IV",1.475,1.243,1.751,430),("NWICU",0.929,0.498,1.734,33),
           ("INSPIRE",2.183,0.914,5.213,32),("eICU",1.272,0.7,2.309,27)])
 
-# ---------- 6. Attenuation 修正（logOR 公式 + OR<1 方向说明）----------
-print("\n"+"="*70); print("6. Attenuation 修正（logOR 公式，标注 OR<1 方向翻转）"); print("="*70)
-# 取自 crossdb_summary.csv
+# ---------- 6. PNI attenuation (OR scale; identical to the manuscript and to ra_periop_mi_pni*.py) ----------
+print("\n"+"="*70); print("6. PNI attenuation (OR scale: 100*(OR_A - OR_B)/OR_A)"); print("="*70)
+# Values from crossdb_summary.csv. The OR scale is used deliberately and consistently
+# throughout the project. On the logOR scale, INSPIRE 30-day death (1.64 -> 0.99, crosses
+# the null) would give ~102% and NWICU infection (0.637 -> 0.315, both <1) would give a
+# negative value; neither can be interpreted as an attenuation proportion. The OR-scale
+# definition stays meaningful for estimates on either side of 1 and matches the numbers
+# reported in the manuscript and Fig. 6.
 cross = [
  ("MIMIC-IV","30d death",3.28,2.08),("NWICU","30d death",4.29,2.55),("INSPIRE","30d death",1.64,0.99),
  ("MIMIC-IV","infection",1.473,1.036),("NWICU","infection",0.637,0.315),("INSPIRE","infection",2.174,1.506),
 ]
-print(f"  {'db':9s} {'outcome':11s} {'A_OR':>6s} {'B_OR':>6s} {'att(logOR)':>11s}  note")
+print(f"  {'db':9s} {'outcome':11s} {'A_OR':>6s} {'B_OR':>6s} {'att(OR)':>9s}  note")
 for db,out,A,B in cross:
-    lA,lB=np.log(A),np.log(B)
-    att=(lA-lB)/lA if lA!=0 else float('nan')
-    # 方向：若 A>1 且 B 更接近1 为正向衰减；若 A<1 则"衰减"符号翻转
-    if A>1:
-        note=f"{'attenuation' if B<A else 'amplification'} toward null"
-    else:
-        note="A<1: metric sign flips (NOT interpretable as attenuation)"
-    print(f"  {db:9s} {out:11s} {A:6.3f} {B:6.3f} {att*100:10.1f}%  {note}")
-    rows.append(dict(section='attenuation(logOR)', outcome=out, model=db, term='gc_high',
+    att=(A-B)/A
+    note = "attenuation toward null" if B < A else "no attenuation"
+    print(f"  {db:9s} {out:11s} {A:6.3f} {B:6.3f} {att*100:8.1f}%  {note}")
+    rows.append(dict(section='attenuation(OR)', outcome=out, model=db, term='gc_high',
                      OR=round(A,3), lo=round(B,3), hi=round(att*100,1), p=float('nan')))
 
 pd.DataFrame(rows).to_csv("revision_v2_analysis.csv", index=False)

@@ -1,6 +1,6 @@
 -- ============================================================================
 -- RA 围术期研究：四库统一提取 SQL 骨架
--- 生成 2026-08-26；基于本机 PostgreSQL 18 直接 SQL 核查（口令已授权）
+-- 生成 2026-08-26；基于本机 PostgreSQL 18 直接 SQL 核查
 -- 四个库各自独立运行对应 SECTION（psql -d <db> -f 本文件 或直接粘贴）
 --
 -- 统一输出列（四库一致，便于后续纵向堆叠/合并分析）：
@@ -100,8 +100,8 @@ gc_rx AS (
               WHEN p.drug ILIKE '%methylprednisolone%' THEN 1.25
               WHEN p.drug ILIKE '%prednisolone%'     THEN 1.0
               WHEN p.drug ILIKE '%prednisone%'       THEN 1.0
-              WHEN p.drug ILIKE '%hydrocortisone%'   THEN 4.0
-              WHEN p.drug ILIKE '%betamethasone%'    THEN 2.5
+              WHEN p.drug ILIKE '%hydrocortisone%'   THEN 0.25
+              WHEN p.drug ILIKE '%betamethasone%'    THEN 6.667
               ELSE NULL END AS pe_mg
   FROM mimiciv_hosp.prescriptions p
   JOIN ra_adm a ON p.subject_id = a.subject_id AND p.hadm_id = a.hadm_id
@@ -161,8 +161,8 @@ gc_rx AS (
               WHEN p.drug ILIKE '%methylprednisolone%' THEN 1.25
               WHEN p.drug ILIKE '%prednisolone%'     THEN 1.0
               WHEN p.drug ILIKE '%prednisone%'       THEN 1.0
-              WHEN p.drug ILIKE '%hydrocortisone%'   THEN 4.0
-              WHEN p.drug ILIKE '%betamethasone%'    THEN 2.5
+              WHEN p.drug ILIKE '%hydrocortisone%'   THEN 0.25
+              WHEN p.drug ILIKE '%betamethasone%'    THEN 6.667
               ELSE NULL END AS pe_mg
   FROM hosp.prescriptions p
   JOIN ra_adm a ON p.subject_id = a.subject_id AND p.hadm_id = a.hadm_id

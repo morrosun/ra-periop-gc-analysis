@@ -1,7 +1,7 @@
 library(survival)
 # Working directory should be the repository root. The Fine-Gray dataset `fg_dataset.csv`
 # is patient-level data and is NOT included; place it under `data/` and set the path below.
-fg_csv <- file.path("data", "fg_dataset.csv")  # ADAPT: path to your extracted fg_dataset.csv
+fg_csv <- file.path("data", "fg_dataset.csv")  # Set RA_GC_DATA/data/ per README
 d <- read.csv(fg_csv)
 d$gc_use[is.na(d$gc_use)] <- 0
 for(v in c("age","sex","sofa","charlson")) d[[v]][is.na(d[[v]])] <- median(d[[v]], na.rm=TRUE)

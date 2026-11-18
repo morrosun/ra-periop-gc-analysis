@@ -43,7 +43,7 @@ def logit_res(frame, outcome, formula):
         if term in ("Intercept",): continue
         b = m.params[term]; se = m.bse[term]; p = m.pvalues[term]
         orr = np.exp(b); lo = np.exp(b-1.96*se); hi = np.exp(b+1.96*se)
-        out[term] = (orv, lo, hi, p) if False else (round(orr,3), round(lo,3), round(hi,3), f"{p:.2e}" if p<0.001 else round(p,3))
+        out[term] = (round(orr,3), round(lo,3), round(hi,3), f"{p:.2e}" if p<0.001 else round(p,3))
     out["_n"] = int(d.shape[0]); out["_n_event"] = int(d[outcome].sum())
     return out
 

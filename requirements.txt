@@ -1,0 +1,11 @@
+# Python dependencies for the analysis scripts in analysis/.
+# Tested with Python 3.13; the scripts also run on 3.10+.
+# Install with:  pip install -r requirements.txt
+# Exact versions verified on the author's environment (Python 3.13).
+pandas==2.3.3
+numpy==2.4.6
+scipy==1.18.0
+statsmodels==0.14.6
+lifelines==0.30.3
+scikit-learn==1.9.0
+matplotlib==3.11.0

@@ -71,7 +71,7 @@ tbl.append(["N (admissions / ICU stays)", f"{full_n}", f"{sub_n}"])
 tbl.append(["Age (yr, mean±SD)", mean_sd(full,"age"), mean_sd(sub,"age")])
 tbl.append(["Female (%)", pct(full,"sex",0), pct(sub,"sex",0)])
 tbl.append(["Glucocorticoid use, any (%)", pct(full,"gc_use",1), pct(sub,"gc_use",1)])
-tbl.append(["GC cumulative dose >100 mg (%)", pct(full,"gc_dose_pred_eq_mg",1) if False else f"{100*(full['gc_dose_pred_eq_mg']>100).mean():.1f}%", f"{100*(sub['gc_dose_fulladm']>100).mean():.1f}%"])
+tbl.append(["GC cumulative dose >100 mg (%)", f"{100*(full['gc_dose_pred_eq_mg']>100).mean():.1f}%", f"{100*(sub['gc_dose_fulladm']>100).mean():.1f}%"])
 tbl.append(["30-day all-cause mortality (%)", pct(full,"allcause_death_30d",1), pct(sub,"allcause_death_30d",1)])
 tbl.append(["In-hospital infection (%)", pct(full,"infection",1), pct(sub,"infection",1)])
 tbl.append(["Charlson (mean±SD)", mean_sd(full,"charlson"), mean_sd(sub,"charlson")])
@@ -249,9 +249,6 @@ land["tt"] = (land["tstop"] - land["tstart"]).clip(lower=0.01)
 Xc = land[["grp"]+covs+["tt","ev"]].copy()
 Xc = pd.get_dummies(Xc, columns=["grp"], drop_first=True)
 Xc = sm.add_constant(Xc).astype(float)
-print("DEBUG land rows", len(land), "events", int(land["ev"].sum()),
-      "| const cols", [c for c in Xc.columns if Xc[c].nunique()<=1],
-      "| nan", bool(Xc.isna().any().any()))
 from statsmodels.duration.hazard_regression import PHReg
 Xdes = Xc.drop(columns=["tt","ev"])
 ph = PHReg(land["tt"].values, Xdes.values, status=land["ev"].values, ties="efron").fit()

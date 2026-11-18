@@ -284,6 +284,7 @@ def add_sens(label, outcome, formula, desc, res):
 
 # S1: in-hospital death (logistic, alt outcome)
 _, r = logit(cr, "inhosp_death", f"inhosp_death ~ C(gc_strata, Treatment('none')) + {COV}")
+r_inhosp = r  # keep for E-value below; do not let later S2-S4 overwrite it
 add_sens("S1 in-hosp death (logistic)", "inhosp_death", "", "alt outcome", r)
 # S2: composite death OR major_comp
 cr["comp"] = ((cr.inhosp_death == 1) | (cr.major_comp == 1)).astype(int)
@@ -331,7 +332,7 @@ if v30:
     ev_rows.append(dict(effect="GC high vs none -> 30d death (adj)", OR=v30[0], CI95=f"{v30[1]}-{v30[2]}",
                         Evalue_point=pt, Evalue_CI=loev))
 # in-hospital death GC-high vs none (S1)
-vih = get_hi(r)
+vih = get_hi(r_inhosp)
 if vih:
     pt, loev = evalue(vih[0], vih[1])
     ev_rows.append(dict(effect="GC high vs none -> in-hosp death (adj)", OR=vih[0], CI95=f"{vih[1]}-{vih[2]}",
